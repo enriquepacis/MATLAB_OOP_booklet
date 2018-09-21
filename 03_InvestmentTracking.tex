@@ -1,0 +1,1094 @@
+% ============================================================
+% ============================================================
+% ============================================================
+\section{Extended Example: Developing Software to Track Investments}
+% ============================================================
+% ============================================================
+% ============================================================
+
+\subsection{Developing an \texttt{Asset} Class} \label{subsect:AssetClass}
+
+Now we begin an extended, multi-part example, which begins with an \texttt{Asset} class. We will initially define an \texttt{Asset} class with the following properties: \texttt{name}, \texttt{symbol}, \texttt{quantity}, \texttt{units} and \texttt{transactionList}. Here \texttt{name} can store a \texttt{char} string to identify a company or mutual fund, and \texttt{symbol} can store a stock ticker symbol or equivalent symbol as a \texttt{char} string. The \texttt{units} property can store a \texttt{char} string specify the units of this asset: \texttt{'shares'}, \texttt{'USD'},  \texttt{'RMB'}, etc. Finally, the \texttt{transactionList} will store the list of transactions pertinent to the holdings in this asset. A transaction will be modeled as an object of the \texttt{Transaction} class, yet to be defined.
+
+To do this, we prepare the class definition file \texttt{Asset.m}:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+classdef Asset
+    %Asset defines an Asset class to store information about a particular
+    %investment asset (stock, mutual fund, currency, etc.).
+    %
+    % By E.P. Blair
+    % Baylor University
+    
+    properties
+        name
+        symbol
+        units
+        transactionList
+    end
+    
+    methods
+        function obj = Asset(AName, ASymbol, AUnits)
+            %Asset Constructs an instance (obj) of the Asset class
+            %   Here, the required syntax is
+            %   >> myObj = Asset( nameStr, symbolStr, unitStr )
+            %   where nameStr, symbolStr, and unitsStr are char strings
+            %   specifying the asset name, symbol, and units ('shares',
+            %   'USD', 'RMB', etc.).
+            obj.name = AName;
+            obj.symbol = ASymbol;
+            obj.units = AUnits;
+        end
+        
+    end
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Here, in the \texttt{properties} section, lines 9-12 establish the desired class properties. The constructor of lines 16-26 is designed to accept three inputs: \texttt{AName}, \texttt{ASymbol}, and \texttt{AUnits}. The value of these parameters are then stored in the appropriate fields of the \texttt{Asset} object.
+
+To test the \texttt{Asset} class definition, we can create a testbed script named \texttt{testbedAsset.m}:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+% testbedAsset.m
+
+newAsset = Asset('X-ray Yankee Zulu, Inc.', 'XYZ', 'shares')
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+This script has one line, which simply invokes the \texttt{Asset} constructor to instantiate a new object, \texttt{newAsset}. The result of this testbed is:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> testbedAsset
+
+newAsset = 
+
+  Asset with properties:
+
+               name: 'X-ray Yankee Zulu, Inc.'
+             symbol: 'XYZ'
+              units: 'shares'
+    transactionList: []
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Lines 2-10 list the output. Here, the required method inputs populate the appropriate object properties, and the \texttt{transactionList} remains empty.
+
+% ========================================
+\subsection{Developing a \texttt{Transaction} Class} \label{subsect:TransactionClass}
+% ========================================
+
+Now we will continue to develop the extended example started in Sect.\ \ref{subsect:AssetClass} by developing a \texttt{Transaction} class to have the following properties: \texttt{date}, \texttt{transactionType}, \texttt{quantity}, \texttt{price} and \texttt{fees}. Here, \texttt{date} can store an object of the pre-defined MATLAB class \texttt{datetime}; \texttt{transactionType} can store a \texttt{char} string to identify whether a transaction is a \texttt{'buy'}, \texttt{'sell'}, \texttt{'short'}, etc.; \texttt{quantity} and \texttt{price} can store a numerical value for the number of units transacted and the unit price, respectively; and, \texttt{fees} can be used to store transaction fees.
+
+\noindent \underline{Solution}. 
+
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+classdef Transaction
+    %Transaction defines a Transaction class to represent a transaction of
+    %an investment assset, represented by the Asset class.
+    %
+    
+    properties
+        date % a MATLAB datetime object
+        transactionType % 'buy', 'sell', 'short', 'dividend', 'split'
+        quantity
+        fee
+        price
+        
+    end % END: properties
+    
+    methods
+        function obj = Transaction( varargin )
+            %Transaction constructs an instance of the Transaction class.
+            %
+            % SYNTAX:
+            %
+            % newTrans = Transaction( Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with the current date/time in
+            %     the date field.
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with a specified date/time. The
+            %     date/time object may be specified as MATLAB datetime
+            %     object or as a 3- or 6-element date vector.
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice, fee)
+            %     Defines a new transaction with a specified date/time and
+            %     a transaction fee.
+            %
+            
+            % This switch-case control group defines the Transaction object
+            % differently based on the 
+            switch nargin
+                % The 3-input case assumes that the date is now
+                case 3 % newTr = Transaction(Ttype, Tquantity, Tprice)
+                    obj.date = datetime('now');
+                    obj.transactionType = varargin{1};
+                    obj.quantity = varargin{2};
+                    obj.fee = 0;
+                    obj.price = varargin{3};
+                    
+                % The 4-input case allows the transaction date to be
+                % specified
+                case 4 % newTr = Transaction(Tdate, Ttype, Tquantity, ...
+                    %              Tprice)
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    obj.quantity = varargin{3};
+                    obj.price = varargin{4};
+                    
+                case 5
+                    % newTr = Transaction( Tdate, Ttype, Tquantity, ...
+                    %           Tprice, Tfee )
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    obj.quantity = varargin{3};
+                    obj.price = varargin{4};
+                    obj.fee = varargin{5};
+                    
+                otherwise
+                    error('Invalid number of input arguments.')
+            end
+            
+        end
+        
+
+        
+    end % END: methods
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+The above listing defines the \texttt{Transaction} class, with only a constructor. In the \texttt{Transaction} constructor, fairly advanced techniques are used, such as a variable set of input arguments. Calls to the constructor are allowed with three, four, or five inputs. In the first (three-input) case, the \texttt{date} field is assumed to be the current date and time. The four-input and five-input cases allow the specification of the \texttt{date} property as either a date vector or as a \texttt{datetime} object (this is a pre-defined MATLAB class). To handle the different input cases, we use the \texttt{nargin} function along with a \texttt{switch}-\texttt{case} control sequence. A \texttt{switch}-\texttt{case} control also is used to enable the flexibility in the specification of the transaction date and time. See Appendix \ref{appendix:switch_case} for more information on \texttt{switch}-\texttt{case} controls.
+
+We provide the testbed function \texttt{testbedTransaction.m} to test the class:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+% testbedTransaction.m
+
+% three-input constructor invocation
+trans01 = Transaction( 'buy', 75, 71.90 )
+
+% four-input constructor invocation with argument 1 as a date vector
+trans02 = Transaction( [2017, 12, 1, 14, 30, 0], 'buy', 100, 7.19 )
+
+% four-input constructor invocation with argument 1 as a datetime object
+trans03 = Transaction( datetime('now'), 'sell', 25, 52 )
+
+% five-input constructor to specify a transaction fee
+trans04 = Transaction( datetime('now'), 'sell', 25, 52, 7 )
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The output of \texttt{testbedTransaction.m} demonstrates that the class definition works as designed:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> testbedTransaction
+
+trans01 = 
+
+  Transaction with properties:
+
+               date: 26-Dec-2017 11:13:15
+    transactionType: 'buy'
+           quantity: 75
+                fee: 0
+              price: 71.9000
+
+
+trans02 = 
+
+  Transaction with properties:
+
+               date: 01-Dec-2017 14:30:00
+    transactionType: 'buy'
+           quantity: 100
+                fee: []
+              price: 7.1900
+
+
+trans03 = 
+
+  Transaction with properties:
+
+               date: 26-Dec-2017 11:13:15
+    transactionType: 'sell'
+           quantity: 25
+                fee: []
+              price: 52
+
+
+trans04 = 
+
+  Transaction with properties:
+
+               date: 26-Dec-2017 11:13:15
+    transactionType: 'sell'
+           quantity: 25
+                fee: 7
+              price: 52
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+% ========================================
+\subsection{Adding Transactions to an \texttt{Asset} Object} \label{subsect:AddTransaction}
+% ========================================
+
+Now we return to developing the \texttt{Asset} class. The goal here is to add transactions to an existing asset, say \texttt{someAsset}. We will treat the \texttt{transactionList} property as an array of type \texttt{Transaction}. If \texttt{transactionList} is empty, then the specified transaction is stored in the \texttt{transactionList} property. If the \texttt{transactionList} is not empty, then the new transaction should be added to the list, and transactions should be listed in chronological order.
+
+\noindent \underline{Solution}.
+
+We add an \texttt{addTransaction()} method to the \texttt{Asset} class definition file \texttt{Asset.m}. For clarity, we will use the notation \texttt{ClassName/methodName()} to remove any ambiguity regarding the class with which a method is associated. Also, a method \texttt{Asset/listTransactions()} which will compactly list the details of all transactions. This will help us test how well the \texttt{addTranstion()} method works. The updated class definition looks like this:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+classdef Asset
+    %Asset defines an Asset class to store information about a particular
+    %investment asset (stock, mutual fund, currency, etc.).
+    %
+    % By E.P. Blair
+    % Baylor University
+    
+    properties
+        name = 'X-ray Yankee Zulu'
+        symbol = 'XYZ'
+        units = 'shares'
+        transactionList
+    end
+    
+    methods
+        function obj = Asset(AName, ASymbol, AUnits)
+            %Asset Constructs an instance (obj) of the Asset class
+            %   Here, the required syntax is
+            %   >> myObj = Asset( nameStr, symbolStr, unitStr )
+            %   where nameStr, symbolStr, and unitsStr are char strings
+            %   specifying the asset name, symbol, and units ('shares',
+            %   'USD', 'RMB', etc.).
+            obj.name = AName;
+            obj.symbol = ASymbol;
+            obj.units = AUnits;
+        end
+        
+        function obj = addTransaction(obj, newTransaction)
+            % addTransaction() adds a transaction newTransaction to the
+            % transactionList property of obj
+            
+            % add the transaction on the end of the list
+            obj.transactionList = [obj.transactionList newTransaction];
+            
+            % if the length of the list is greater than 1, the list may
+            % require sorting
+            
+            if length(obj.transactionList) > 1
+                % Create a list of transaction dates by iterating through
+                % all transactions and adding dates to dateList
+                dateList = []; % empty date list
+                for TransIdx = 1:n_trans_old+1
+                    % append the date of obj.transactionList(TransIdx) to
+                    % dateList (unsorted)
+                    dateList = [dateList ...
+                        obj.transactionList(TransIdx).date];
+                end
+                
+                % sort the transaction list
+                
+                % obtain an index of sorted transaction dates
+                %   The sort function returns the sorted list along with
+                %   the indices of sorted lists within the unsorted list
+                %   The indices of the dateList, sortIndex, will be used to
+                %   sort the list of transactions.
+                [~, sortIndex] = sort(dateList);
+                
+                % reorder the unsorted transactions and store in
+                % obj.transactionList
+                obj.transactionList = obj.transactionList(sortIndex);
+            end % END: if length(obj.transactionList) > 1
+                
+        end
+        
+        function obj = listTransactions(obj)
+            numTrans = length(obj.transactionList);
+            
+            if numTrans > 0
+                for transIndex = 1:numTrans
+                    obj.transactionList(transIndex).listDetails;
+                end
+            else
+                disp(['Asset ', obj.name, ' (', obj.symbol, ...
+                    ') has no transactions.'])
+            end
+            
+        end
+
+        
+    end % END: methods
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The new \texttt{Asset/addTransaction()} method is the first non-constructor method we've added to the \texttt{Asset} class. It works by first appending the new \texttt{Transaction} on the end of the \texttt{transactionList} property. If the total number of transactions \textemdash including the newly-appended transaction \textemdash is greater than 1, then the list may require sorting, so we will sort it regardless of whether it requires sorting (it may take even more work to figure out if the list requires sorting). Since the object \texttt{obj} is only a copy of the original \texttt{obj} upon which \texttt{addTransaction()} was invoked, we pass the modified copy \texttt{obj} out as an output argument.
+
+The sorting uses the sort command. For a sortable array of elements \texttt{x}\textemdash such as \texttt{double}s or \texttt{datetime} objects, as in the present case\textemdash the \verb![x_sort, sortIndex] = sort(x)! returns a sorted version of \verb!x! in the output \verb!x_sort!, as well as the matching sequence of indices required to sort the original array \verb!x!. This sequence, \verb!sortIndex!, then is used to sort other pieces of data associated with the original array \texttt{x}. This is applied in \verb!addTransaction()! when we create \texttt{dateList}, an array of \texttt{datetime} objects associated with an array of \verb!Transaction! objects (line 45) and subsequently use the \texttt{sort()} command on \texttt{dateList}. We will not make direct use of a sorted list of dates, so we use \verb!~! to avoid storing that data in memory within the function \texttt{addTransaction}. However, the array \verb!sortIndex! will be used to sort the associated \verb!obj.transactionList! itself.
+
+The \texttt{Asset/listTransactions()} method of lines 65-77 will be used to list the details of all \texttt{Transaction} objects associated with an \texttt{Asset} object. It is designed to use a \texttt{for} loop to iterate through all \texttt{Transaction} objects, and to print the details of each transaction using a \texttt{Transaction} method \texttt{listDetails()}, which remains to be defined.
+
+This is an example of hierarchical programming: a user can instruct an \texttt{Asset} object to list its transaction details by invoking the \texttt{Asset/listTransactions()} method. \texttt{Asset/listTransactions()} method, in turn, invokes the \texttt{Transaction/listDetails()} method for each associated \texttt{Transaction} object. We list below \texttt{Transaction} class definition, upgraded with a definition for the \texttt{listDetails()} method:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+classdef Transaction
+    %Transaction defines a Transaction class to represent a transaction of
+    %an investment assset, represented by the Asset class.
+    %
+    
+    properties
+        date % a MATLAB datetime object
+        transactionType % 'buy', 'sell', 'short', 'dividend', 'split'
+        quantity
+        fee
+        price
+        
+    end % END: properties
+    
+    methods
+        function obj = Transaction( varargin )
+            %Transaction constructs an instance of the Transaction class.
+            %
+            % SYNTAX:
+            %
+            % newTrans = Transaction( Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with the current date/time in
+            %     the date field.
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with a specified date/time. The
+            %     date/time object may be specified as MATLAB datetime
+            %     object or as a 3- or 6-element date vector.
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice, fee)
+            %     Defines a new transaction with a specified date/time and
+            %     a transaction fee.
+            %
+            
+            % This switch-case control group defines the Transaction object
+            % differently based on the 
+            switch nargin
+                % The 3-input case assumes that the date is now
+                case 3 % newTr = Transaction(Ttype, Tquantity, Tprice)
+                    obj.date = datetime('now');
+                    obj.transactionType = varargin{1};
+                    obj.quantity = varargin{2};
+                    obj.fee = 0;
+                    obj.price = varargin{3};
+                    
+                % The 4-input case allows the transaction date to be
+                % specified
+                case 4 % newTr = Transaction(Tdate, Ttype, Tquantity, ...
+                    %              Tprice)
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    obj.quantity = varargin{3};
+                    obj.price = varargin{4};
+                    
+                case 5
+                    % newTr = Transaction( Tdate, Ttype, Tquantity, ...
+                    %           Tprice, Tfee )
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    obj.quantity = varargin{3};
+                    obj.price = varargin{4};
+                    obj.fee = varargin{5};
+                    
+                otherwise
+                    error('Invalid number of input arguments.')
+            end
+            
+        end
+        
+        
+        function listDetails(obj)
+            DateString = [char(obj.date) ...
+                blanks(20 - length(char(obj.date)) ) ];
+            TypeString = [blanks(10-length(obj.transactionType)), ...
+                obj.transactionType];
+            
+            QtyString = [blanks(10 - length(num2str(obj.quantity))), ...
+                num2str(obj.quantity)];
+            
+            RawPriceStr = num2str(obj.price, '%0.3g');
+            PriceString = [' at ', blanks(10 - length(RawPriceStr)), ...
+                RawPriceStr];
+            
+            DetailString = [DateString, TypeString, QtyString, PriceString];
+            
+            disp(DetailString)
+        end
+        
+    end % END: methods
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+Additionally, we add some functionality to the \texttt{Transaction} class. We add a method \texttt{listDetails} that lists the details of a \texttt{Transaction} object. The upgraded \texttt{Transaction} class is listed in 91-107. Here, we define several strings of fixed width. First, we use the \texttt{char} method defined for \texttt{datetime} objects to generate a \texttt{char} string representing the transaction date (see line 91-92). This string has length \verb!length(char(obj.date))!. We use the \texttt{blanks()} function to right-pad this string with white space so that \texttt{DateString} is a length of 20 characters always.  In line 93, we include the string contained in the \texttt{obj.transactionType} property as part of the string \texttt{TypeString} but we use the \texttt{blanks()} function to left-pad the \texttt{obj.transactionType} string with white spaces. This forms \texttt{TypeString} as a 10-character string. We use the same technique in line 97 to create a 10-character string detailing the number of units transacted stored in the \texttt{obj.quantity} property. Here, the \texttt{num2str()} function is used to convert the \texttt{double} data representing the number of units transacted to a \texttt{char} string. Similarly, lines 100-101 form a fixed-length \texttt{char} string \texttt{PriceString} detailing the price per unit of the transaction. Finally, in line 104, \texttt{DateString}, \texttt{TypeString}, \texttt{QtyString}, and \texttt{PriceString} are concatenated in one string \texttt{DetailString}. Then, in line 106, the \texttt{disp()} function is used to print \texttt{DetailString} to the Command Window output. All of this functionality is called simply within the \texttt{Asset} \texttt{listTransactions} method by invoking the \texttt{Transaction} class \texttt{listDetails} method for each \texttt{Transaction} object.
+
+A modified version of \texttt{testbedAsset.m} is shown here, in Listing \ref{lst:testbedAsset02}:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The code listing for \texttt{testbedAsset.m}. Here, the testbed adds transactions to \texttt{newAsset} and invokes the \texttt{listTransactions} method to display information about associated \texttt{Transaction} objects.}, label={lst:testbedAsset02}]
+% testbedAsset.m
+
+% create an new Asset object with no transactions
+newAsset = Asset('X-ray Yankee Zulu, Inc.', 'XYZ', 'shares')
+
+% add a buy transaction with the current date
+newAsset = newAsset.addTransaction( Transaction('buy', 100, 24.03) )
+
+% list transaction data after the first addition
+newAsset.listTransactions;
+
+% add a transaction with an earlier date
+newAsset = newAsset.addTransaction( Transaction([2017, 12, 1], ...
+    'buy', 25, 22.97) )
+
+% list transaction data after the first addition
+newAsset.listTransactions;
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The output of \texttt{testbedAsset.m} is shown below:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The output of \texttt{testbedAsset.m}}, label={lst:AssetOutput02}]
+>> testbedAsset
+
+newAsset = 
+
+  Asset with properties:
+
+               name: 'X-ray Yankee Zulu, Inc.'
+             symbol: 'XYZ'
+              units: 'shares'
+    transactionList: []
+
+
+newAsset = 
+
+  Asset with properties:
+
+               name: 'X-ray Yankee Zulu, Inc.'
+             symbol: 'XYZ'
+              units: 'shares'
+    transactionList: [1×1 Transaction]
+
+Transactions for X-ray Yankee Zulu, Inc. (XYZ):
+26-Dec-2017 21:36:04       buy       100 at         24
+
+newAsset = 
+
+  Asset with properties:
+
+               name: 'X-ray Yankee Zulu, Inc.'
+             symbol: 'XYZ'
+              units: 'shares'
+    transactionList: [1×2 Transaction]
+
+Transactions for X-ray Yankee Zulu, Inc. (XYZ):
+01-Dec-2017                buy        25 at         23
+26-Dec-2017 21:36:04       buy       100 at         24
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Line 3 of Listing \ref{lst:testbedAsset02} resulted in output lines 3-10. Here, we see that \texttt{newAsset} has an empty \texttt{transactionList} array property. Line 7 of Listing \ref{lst:testbedAsset02} adds a new transaction, resulting in output lines 13-20 here. This shows that \texttt{newAsset} now has one transaction. Line 10 of Listing \ref{lst:testbedAsset02} invokes the \texttt{listTransactions()} method for \texttt{newAsset}, resulting in output lines 22-23 here. Next, a second, earlier, transaction is added in line 13 of Listing \ref{lst:testbedAsset02}. This results in the output of lines 25-32 here. When we again invoke the \texttt{listTransactions()} method, we see that not only does \texttt{newAsset} have two transactions, but the transactions are listed in chronological order from earliest to latest.
+
+% ========================================
+\subsection{Calculating the Value of Holdings in an \texttt{Asset}} \label{subsect:CalculateAssetValue}
+% ========================================
+
+To calculate the value of holdings in an asset, we will add a method \texttt{Asset/calculateValue()}. This will iterate through all the \texttt{Transaction} objects stored in an \texttt{Asset} object's \texttt{transactionList}. For each transaction, \texttt{Asset/calculateValue()} determine how that transaction will affect the holdings and determine the cost of that transaction based on the type of the transaction and the number of units transacted. In support of this, we first list some upgrades and changes to the \texttt{Transaction} class. Changes and upgrades are as follows:
+\begin{itemize}
+\item To support dividend and split transactions, the following class properties are added: \texttt{dividend}, \texttt{split\_ratio})
+\item Some properties (\texttt{quantity}, \texttt{dividend}, \texttt{split\_ratio}) are assigned a default value. This is done by using an assignment operator and the desired default value along with the property declaration in the \texttt{properties} section (syntax: \texttt{Property = defaultValue;}).
+\item The \texttt{Transaction} constructor four-input case (inside the \texttt{switch nargin} control block) is augmented with a \texttt{switch obj.transactionType}-\texttt{case} to handle \texttt{div-rnv} (dividend reinvestment) transactions. Here, in the \texttt{'div-rnv'} case, the third argument is not the quantity of units transacted, but rather a total dollar amount. The fourth argument remains the price per unit, and this enables the calculation of units bought with a reinvested dividend.
+\end{itemize}
+The upgraded \texttt{Transaction} class definition is listed below.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The \texttt{Transaction} class, as enhanced to support \texttt{Asset} value calculations.}, label={lst:TransactionForCalculations}]
+classdef Transaction
+    %Transaction defines a Transaction class to represent a transaction of
+    %an investment assset, represented by the Asset class.
+    %
+    
+    properties
+        date % a MATLAB datetime object
+        transactionType % 'buy', 'sell', 'short', 'dividend', 'split'
+        quantity = 0;
+        dividend = 0;
+        split_ratio = 1;
+        fee = 0; % Default value: zero
+        price
+        
+    end % END: properties
+    
+    methods
+        function obj = Transaction( varargin )
+            %Transaction constructs an instance of the Transaction class.
+            %
+            % SYNTAX:
+            %
+            % newTrans = Transaction( Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with the current date/time in
+            %     the date field. Valid transaction types are 'buy',
+            %     'sell', and 'div-rnv' (dividend reinvestment).
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice)
+            %     Defines a new transaction with a specified date/time. The
+            %     date/time object may be specified as MATLAB datetime
+            %     object or as a 3- or 6-element date vector.
+            %
+            % newTrans = Transaction( Tdate, Ttype, Tquantity, Tprice, fee)
+            %     Defines a new transaction with a specified date/time and
+            %     a transaction fee.
+            %
+            
+            % This switch-case control group defines the Transaction object
+            % differently based on the 
+            switch nargin
+                % The 3-input case assumes that the date is now
+                case 3 % newTr = Transaction(Ttype, Tquantity, Tprice)
+                    obj.date = datetime('now');
+                    obj.transactionType = varargin{1};
+                    obj.quantity = varargin{2};
+                    obj.fee = 0;
+                    obj.price = varargin{3};
+                    
+                % The 4-input case allows the transaction date to be
+                % specified
+                case 4 % newTr = Transaction(Tdate, Ttype, Tquantity, ...
+                    %              Tprice)
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    
+                    obj.price = varargin{4};
+                    
+                    switch obj.transactionType
+                        case 'div-rnv'
+                            obj.dividend = varargin{3};
+                            obj.quantity = obj.dividend/obj.price;
+                        otherwise
+                            obj.quantity = varargin{3};
+                    end
+                    
+                    
+                case 5
+                    % newTr = Transaction( Tdate, Ttype, Tquantity, ...
+                    %           Tprice, Tfee )
+                    
+                    switch class(varargin{1})
+                        case 'datetime'
+                            obj.date = varargin{1};
+                        case 'double' % the date specifier is in vector form
+                            % convert a date vector to a datetime object
+                            obj.date = datetime(varargin{1});
+                        otherwise
+                            error('Invalid transaction date specification.')
+                    end
+                    
+                    obj.transactionType = varargin{2};
+                    obj.quantity = varargin{3};
+                    obj.price = varargin{4};
+                    obj.fee = varargin{5};
+                    
+                otherwise
+                    error('Invalid number of input arguments.')
+            end
+            
+        end
+        
+        
+        function listDetails(obj)
+            DateString = [char(obj.date) ...
+                blanks(20 - length(char(obj.date)) ) ];
+            TypeString = [blanks(10-length(obj.transactionType)), ...
+                obj.transactionType];
+            
+            QtyString = [blanks(10 - length(num2str(obj.quantity))), ...
+                num2str(obj.quantity)];
+            
+            RawPriceStr = num2str(obj.price, '%0.3g');
+            PriceString = [' at ', blanks(10 - length(RawPriceStr)), ...
+                RawPriceStr];
+            
+            DetailString = [DateString, TypeString, QtyString, PriceString];
+            
+            disp(DetailString)
+        end
+        
+    end % END: methods
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+Next, we list the upgraded \texttt{Asset} class definition with the new \texttt{calculateValue()} function:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The \texttt{Asset} class with a new \texttt{calculateValue()} method.}, label={lst:AssetValueCalculation}]
+classdef Asset
+    %Asset defines an Asset class to store information about a particular
+    %investment asset (stock, mutual fund, currency, etc.).
+    %
+    % By E.P. Blair
+    % Baylor University
+    
+    properties
+        name = 'X-ray Yankee Zulu'
+        symbol = 'XYZ'
+        units = 'shares'
+        transactionList
+    end
+    
+    methods
+        function obj = Asset(AName, ASymbol, AUnits)
+            %Asset Constructs an instance (obj) of the Asset class
+            %   Here, the required syntax is
+            %   >> myObj = Asset( nameStr, symbolStr, unitStr )
+            %   where nameStr, symbolStr, and unitsStr are char strings
+            %   specifying the asset name, symbol, and units ('shares',
+            %   'USD', 'RMB', etc.).
+            obj.name = AName;
+            obj.symbol = ASymbol;
+            obj.units = AUnits;
+        end
+        
+        function obj = addTransaction(obj, newTransaction)
+            % addTransaction() adds a transaction newTransaction to the
+            % transactionList property of obj
+            
+            % add the transaction on the end of the list
+            obj.transactionList = [obj.transactionList newTransaction];
+            
+            % if the length of the list is greater than 1, the list may
+            % require sorting
+            
+            if length(obj.transactionList) > 1
+                % Create a list of transaction dates by iterating through
+                % all transactions and adding dates to dateList
+                dateList = []; % empty date list
+                for TransIdx = 1:length(obj.transactionList)
+                    % append the date of obj.transactionList(TransIdx) to
+                    % dateList (unsorted)
+                    dateList = [dateList ...
+                        obj.transactionList(TransIdx).date];
+                end
+                
+                % sort the transaction list
+                
+                % obtain an index of sorted transaction dates
+                %   The sort function returns the sorted list along with
+                %   the indices of sorted lists within the unsorted list
+                %   The indices of the dateList, sortIndex, will be used to
+                %   sort the list of transactions.
+                [~, sortIndex] = sort(dateList);
+                
+                % reorder the unsorted transactions and store in
+                % obj.transactionList
+                obj.transactionList = obj.transactionList(sortIndex);
+            end % END: if length(obj.transactionList) > 1
+                
+        end
+        
+        function obj = listTransactions(obj)
+            numTrans = length(obj.transactionList);
+            
+            if numTrans > 0
+                disp(['Transactions for ', obj.name, ' (', obj.symbol, ...
+                    '):'])
+                for transIndex = 1:numTrans
+                    obj.transactionList(transIndex).listDetails;
+                end
+                
+            else
+                disp(['Asset ', obj.name, ' (', obj.symbol, ...
+                    ') has no transactions.'])
+            end
+            
+        end
+
+        function varargout = calculateValue(obj)
+            % Asset/calculateValue performs an analysis on the list of
+            % transactions to calculate asset holdings and their value at
+            % the time of the last transaction.
+            % 
+            % Syntax:
+            %
+            % Value = myAsset.calculateValue returns the value of holdings
+            %     at the time of the last transaction.
+            %
+            % [Value, Units] = myAsset.calculateValue additionally returns
+            %     the total number of units held.
+            %
+            % [Value, Units, CostBasis] = myAsset.calculateValue returns
+            %     the investor's cost basis.
+            %
+            
+            Value = 0; % value of holdings
+            TotalUnits = 0; % number of units held
+            CostBasis = 0; % cost basis of investment
+            if ~isempty(obj.transactionList)
+                numTrans = length(obj.transactionList);
+                
+                % Units: storage vector for units owned as a fcn. of time
+                Units = zeros(1, numTrans);
+                Cost = zeros(1, numTrans);
+                Value = zeros(1, numTrans);
+                
+                % Iterate through all transitions
+                for transIdx = 1:numTrans
+                    % extract a single transition
+                    tempTrans = obj.transactionList(transIdx);
+                    
+                    if transIdx == 1
+                        Units(1) = tempTrans.quantity;
+                        Cost(transIdx) = tempTrans.price ...
+                            * tempTrans.quantity ...
+                            + tempTrans.fee;
+                        
+                    else
+                        
+                        
+                        switch tempTrans.transactionType
+                            case 'buy'
+                                Units(transIdx) = Units(transIdx-1) ...
+                                    + tempTrans.quantity;
+
+                                Cost(transIdx) = tempTrans.price ...
+                                    * tempTrans.quantity ...
+                                    + tempTrans.fee;
+                                
+                            case 'sell'
+                                Units(transIdx) = Units(transIdx-1) ...
+                                    - tempTrans.quantity;
+                                Cost(transIdx) = -tempTrans.price ...
+                                    * tempTrans.quantity ...
+                                    + tempTrans.fee;
+                                
+                            case 'split'
+                                Units(transIdx) = Units(transIdx-1) ...
+                                    * tempTrans.split_ratio;
+                                
+                            case 'div-rnv'
+                                Units(transIdx) = Units(transIdx-1) ...
+                                    + tempTrans.dividend/tempTrans.price;
+                                
+                        end
+                        
+                        
+                    end
+
+                end % END: for transIdx = 1:numTrans 
+                
+                CostBasis = sum(Cost);
+                Qty = Units(end);
+                Value = Qty*tempTrans.price; %
+                LastPrice = tempTrans.price;
+                
+            end
+            
+            
+            switch nargout
+                case 1
+                    varargout{1} = Value;
+                case 2
+                    varargout{1} = Value;
+                    varargout{2} = Qty;
+                case 3
+                    varargout{1} = Value;
+                    varargout{2} = Qty;
+                    varargout{3} = CostBasis;
+                case 4
+                    varargout{1} = Value;
+                    varargout{2} = Qty;
+                    varargout{3} = CostBasis;
+                    varargout{4} = LastPrice;
+
+                otherwise
+                    error('Invalid number of output arguments.')
+            end
+            
+        end
+        
+    end % END: methods
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+The new \texttt{Asset/calculateValue()} method is listed in lines 82-174 of Listing \ref{lst:AssetValueCalculation}.  The function header uses \texttt{varargout} (a variable-length set of output arguments) to allow the user flexibility in outputs. The help documentation comments provide information about the syntax; and a \texttt{switch}-\texttt{case} control (lines 160-172) manages the outputs depending on \texttt{nargout}, the number of outputs  in the particular function invocation.
+
+Finally, we list a new testbed script, \texttt{testbedAssetv02.m} (see Listing \ref{lst:AssetValueCalculationTestbed}). This defines an \texttt{Asset} object \texttt{newAsset}. It adds several transactions to \texttt{newAsset} and lists them using the \texttt{Asset} method \texttt{listTransactions()}. Finally, the script invokes the \texttt{Asset/calculateValue()} method and lists data calculated for this asset. Here, one \texttt{disp()} command was used, and the command \texttt{char(10)} embeds character ten (the MATLAB code for a newline character) in the string and breaks the string up for readability.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={A testbed function for \texttt{Asset} value calculations.}, label={lst:AssetValueCalculationTestbed}]
+% testbedAssetv02.m
+
+% create an new Asset object with no transactions
+newAsset = Asset('X-ray Yankee Zulu, Inc.', 'XYZ', 'shares');
+
+% add a buy transaction with the current date
+newAsset = newAsset.addTransaction( Transaction('sell', 40, 24.03) );
+
+% list transaction data after the first addition
+newAsset.listTransactions;
+
+% add a transaction with an earlier date
+newAsset = newAsset.addTransaction( Transaction([2017, 1, 1], ...
+    'buy', 25, 22.97) );
+
+% add a transaction with an earlier date
+newAsset = newAsset.addTransaction( Transaction([2017, 3, 18], ...
+    'div-rnv', 40, 23.58) );
+
+% add a transaction with an earlier date
+newAsset = newAsset.addTransaction( Transaction([2017, 5, 24], ...
+    'buy', 100, 25.17) );
+
+% list transaction data after the first addition
+newAsset.listTransactions;
+
+[Value, Holdings, CostBasis] = newAsset.calculateValue;
+Gain = Value - CostBasis;
+
+disp([char(10), 'Asset           : ', newAsset.name, ' (', newAsset.symbol, ...
+    ')', char(10), 'Quantity        : ', num2str(Holdings), ...
+    char(10), 'Value           : $', num2str(Value), ...
+    char(10), 'Cost Basis      : $', num2str(CostBasis), ...
+    char(10), 'Unrealized Gains: $', num2str(Gain), ...
+    ' or ', num2str(100*Gain/CostBasis, '%0.4g'), '%'])
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Running the testbed script of Listing \ref{lst:AssetValueCalculationTestbed} yields the output of Listing \ref{lst:AssetValueCalculationTestbedOutput}.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={Output for the testbed function of Listing \ref{lst:AssetValueCalculationTestbed}.}, label={lst:AssetValueCalculationTestbedOutput}]
+>> testbedAssetv02
+Transactions for X-ray Yankee Zulu, Inc. (XYZ):
+29-Dec-2017 20:46:36      sell        40 at         24
+Transactions for X-ray Yankee Zulu, Inc. (XYZ):
+01-Jan-2017                buy        25 at         23
+18-Mar-2017            div-rnv    1.6964 at       23.6
+24-May-2017                buy       100 at       25.2
+29-Dec-2017 20:46:36      sell        40 at         24
+
+Asset           : X-ray Yankee Zulu, Inc. (XYZ)
+Quantity        : 86.6964
+Value           : $2083.3134
+Cost Basis      : $2130.05
+Unrealized Gains: $-46.7366 or -2.194%
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Some additional formatting may be desired for dollar and percentage amounts.
+
+% ============================================================
+% ============================================================
+% ============================================================
+\subsection{A \texttt{Portfolio} Class: a Container Class for \texttt{Asset} Objects}
+% ============================================================
+% ============================================================
+% ============================================================
+
+Here, we will define a \texttt{Portfolio} class that serves as a container class for \texttt{Asset} objects. Actually, we already created the \texttt{Asset} class as a container for \texttt{Transaction} objects. The \texttt{Portfolio} class will be built with an \texttt{addAsset()} method and a \texttt{calculateValue()} method. The \texttt{Portfolio} \texttt{calculateValue()} method will hierarchically calculate its own value by invoking the \texttt{Asset} class \texttt{calculateValue()} method for each \texttt{Asset} object held in the portfolio.
+
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The class definition for \texttt{Portfolio}, a container class for objects of class \texttt{Asset}.}, label={lst:PortfolioClass}]
+classdef Portfolio
+    %PORTFOLIO defines a container class Portfolio for objects of type
+    %   Asset. A Portfolio object calculates its own value by calling each
+    %   contained Asset object to evaluate and return its individual value.
+    %
+    
+    properties
+        name
+        assetList
+    end
+    
+    methods
+        function obj = Portfolio(varargin)
+            %Portfolio constructs an Portfolio object.
+            %
+            %   SYNTAX:
+            %
+            %   myPortfolio = Portfolio creates an empty portfolio.
+            %
+            %   myPortfolio = Portfolio( portfolioName, assetArray )
+            %   Detailed explanation goes here
+            
+            switch nargin
+                case 0
+                    obj.name = 'Default Portfolio';
+                    obj.assetList = [];
+                    
+                case 2
+                    obj.name = varargin{1};
+                    if strcmp(class(varargin{2}), 'Asset') % input checking
+                        obj.assetList = varargin{2};
+                    else
+                        error('Non-Asset object specified for asset list.')
+                    end
+
+            end 
+        end % END: Portfolio constructor
+        
+        function obj = addAssets(obj, additionalAssets)
+            % Portfolio/addAsset adds new Asset objects to the assetList
+            %   property of a Portfolio object.
+            %
+            % SYNTAX:
+            %
+            % myPortfolio = myPortfolio.addAsset( additionalAssets )
+            %   
+            if strcmp(class(additionalAssets), 'Asset') % input checking
+                obj.assetList = [obj.assetList additionalAssets];
+            else
+                error('Non-Asset object specified for asset list.')
+            end    
+        end % END: Portfolio/addAssets()
+        
+        function varargout = calculateValue(obj)
+            
+            PortfolioValue = 0;
+            PortfolioData = [];
+            
+            if ~isempty(obj.assetList)
+                numAssets = length(obj.assetList);
+                Symbol = cell(numAssets, 1);
+                Value = zeros(numAssets, 1); % storage vector
+                Holdings = Value; % storage vector
+                CostBasis = Value; % storage vector
+                UnitPrice = Value;
+                for AssetIdx = 1:numAssets
+                    tempAsset = obj.assetList(AssetIdx);
+                    [Value(AssetIdx), Holdings(AssetIdx), ...
+                        CostBasis(AssetIdx), ...
+                        UnitPrice(AssetIdx)] = tempAsset.calculateValue;
+                    Symbol{AssetIdx} = tempAsset.symbol;
+                end
+                UnrealizedGains = Value - CostBasis;
+                
+                PortfolioValue = sum(Value);
+                PortfolioData = table(Symbol, Value, Holdings, ...
+                    UnitPrice, CostBasis, UnrealizedGains);
+            end
+                
+            switch nargout 
+                case 1
+                    varargout{1} = PortfolioValue;
+                case 2
+                    varargout{1} = PortfolioValue;
+                    varargout{2} = PortfolioData;
+                otherwise
+                    error('Invalid number of outputs specified.')
+            end
+                    
+        end % END: Portfolio/calculateValue()
+    end
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+The key property of \texttt{Portfolio} in Listing \ref{lst:PortfolioClass} is the \texttt{assetList} property. This property will store a horizontal concatenation of \texttt{Asset} objects. The concatenation is seen in the \texttt{Portfolio} class \texttt{addAssets()} method. Finally, the \texttt{Portfolio} class \texttt{calculateValue()} method invokes the \texttt{Asset} class \texttt{calculateValue()} method on \texttt{Asset} objects contained by the \texttt{Portfolio} object. For each \texttt{Asset} object, \texttt{Portfolio} \texttt{calculateValue()} method saves information about holdings at the last transaction, including: value, total holdings, unit price, symbol, and the price per unit.  This data then is combined in a MATLAB \texttt{table} object. 
+
+Next, I list a testbed function, \texttt{testbedPortfolio.m} in Listing \ref{lst:PortfolioTestbed}. Here, two \texttt{Asset} objects are created, and several \texttt{Transaction} objects are added to each. Then, the two \texttt{Asset} objects are added to a new \texttt{Portfolio} object using the \texttt{Portfolio} method \texttt{addAssets()}. Finally, the \texttt{Portfolio} method \texttt{calculateValue()} is invoked on the new \texttt{Portfolio} object, and the returned data is printed using the \texttt{disp()} function.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={The class definition for \texttt{Portfolio}, a container class for objects of class \texttt{Asset}.}, label={lst:PortfolioTestbed}]
+% testbedPortfolio.m
+
+% Define firstAsset and add some transactions
+firstAsset = Asset('X-ray Yankee Zulu', 'XYZ', 'shares');
+firstAsset = firstAsset.addTransaction( Transaction([2015, 10, 1], ...
+    'buy', 100, 26.75) );
+firstAsset = firstAsset.addTransaction( Transaction([2016, 5, 1], ...
+    'sell', 25, 32.18) );
+firstAsset = firstAsset.addTransaction( Transaction([2016, 12, 28], ...
+    'div-rnv', 75.29, 33.42) );
+firstAsset = firstAsset.addTransaction( Transaction([2017, 4, 1], ...
+    'buy', 30, 32.18) );
+firstAsset = firstAsset.addTransaction( Transaction([2017, 12, 27], ...
+    'div-rnv', 82.15, 36.25) );
+
+secondAsset = Asset('Quebec Romeo Sierra', 'QRS', 'shares');
+secondAsset = secondAsset.addTransaction( Transaction([2014, 3, 8], ...
+    'buy', 50, 13.28) );
+secondAsset = secondAsset.addTransaction( Transaction([2014, 12, 29], ...
+    'div-rnv', 42.69, 16.24) );
+secondAsset = secondAsset.addTransaction( Transaction([2015, 6, 24], ...
+    'buy', 20, 17.01) );
+secondAsset = secondAsset.addTransaction( Transaction([2015, 12, 28], ...
+    'div-rnv', 53.12, 17.79) );
+secondAsset = secondAsset.addTransaction( Transaction([2016, 8, 13], ...
+    'buy', 50, 18.24) );
+secondAsset = secondAsset.addTransaction( Transaction([2016, 12, 27], ...
+    'div-rnv', 62.24, 19.13) );
+
+
+newPortfolio = Portfolio; % create an empty Portfolio object
+
+% add the newly-created assets as 
+newPortfolio = newPortfolio.addAssets([firstAsset, secondAsset]);
+
+[PortfolioValue, PortfolioData] = newPortfolio.calculateValue;
+TotalValue = sum(PortfolioData.Value);
+TotalCostBasis = sum(PortfolioData.CostBasis);
+TotalGains = sum(PortfolioData.UnrealizedGains);
+disp(['Total portfolio value: $', num2str(TotalValue), char(10), ...
+    'Cost basis           : $', num2str(TotalCostBasis), char(10), ...
+    'Unrealized gains     : $', num2str(TotalGains), char(10)]);
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The output for Listing \ref{lst:PortfolioTestbed} is shown below in Listing \ref{lst:PortfolioTestbedOutput}:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor, caption={Output generated by \texttt{testbedPortfolio.m}, listed in Listing \ref{lst:PortfolioTestbed}.}, label={lst:PortfolioTestbedOutput}]
+>> testbedPortfolio
+Total portfolio value: $6435.3136
+Cost basis           : $4752.1
+Unrealized gains     : $1683.2136
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+
+
+\clearpage

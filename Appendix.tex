@@ -1,0 +1,169 @@
+\appendix
+
+% ============================================================
+% ============================================================
+% ============================================================
+\section{Control Statements}
+% ============================================================
+% ============================================================
+% ============================================================
+
+
+% ============================================================
+% ============================================================
+\subsection{\texttt{if}-\texttt{elseif}-\texttt{else}-\texttt{end}}
+% ============================================================
+% ============================================================
+Perhaps the simplest control statement is the achieved using \texttt{if}-\texttt{elseif}-\texttt{else}-\texttt{end}. The simplest version of this is an \texttt{if}-\texttt{end} statement, with the following typical syntax in a script or function:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+if ctrl_expr
+	statements
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Here, the control begins with \verb!if ctrl_expr! and ends with the key word \texttt{end}. The statements are executed if the real part of the control expression \verb!ctrl_expr! has all non-zero elements.
+
+Most typically, \verb!ctrl_expr! is an expression which evaluates to a \texttt{logical} or a \texttt{double} value. An example of this is
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+% basic_if_control.m
+
+a = true
+if a
+    disp('''a'' is true.')
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The output of \verb!basic_if_control.m! is
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> basic_if_control
+
+a =
+
+  logical
+
+   1
+
+'a' is true.
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Notice that \texttt{a} is a logical value, and it results in the execution of the block within the \texttt{if}-\texttt{end} construct.
+
+Optionally, the \texttt{else} key word adds a section which is executed if the preceding sections of the \texttt{if} control is not executed. The \texttt{if}-\texttt{else}-\texttt{end} syntax is demonstrated as follows.
+
+As an example of this, consider the function \verb!sign_fun()!:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+function sign_fun(x)
+% sign_fun(x) prints a message about the negativity of x.
+%
+% By E.P. Blair
+% Baylor University
+
+if x < 0
+    disp('x is negative.')
+else
+    disp('x is non-negative.')
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+This function was invoked on the command line with several test inputs:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> sign_fun(-5)
+x is negative.
+>> sign_fun(-1.25)
+x is negative.
+>> sign_fun(0)
+x is non-negative.
+>> sign_fun(1)
+x is non-negative.
+>> 
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+The \texttt{if}-\texttt{else}-\texttt{end} syntax allows for two different outcomes. Optional \texttt{elseif} blocks may be added to support additional possible outcomes. Consider, for example, this improved version of \verb!sign_fun()!:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+function sign_fun(x)
+% sign_fun(x) prints a message about the sign of x.
+%
+% By E.P. Blair
+% Baylor University
+
+if x < 0
+    disp('x is negative.')
+elseif x > 0
+    disp('x is positive.')
+else
+    disp('x is zero.')
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The command line inputs and outputs for several tests are shown below.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> sign_fun(-2)
+x is negative.
+>> sign_fun(3)
+x is positive.
+>> sign_fun(0)
+x is zero.
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+Multiple \texttt{elseif} blocks may be added, as in the following function, which assigns a letter grade given a percentage score:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+function lg = letter_grade(percentScore)
+% letter_grade maps a percentage score to a letter grade.
+
+if percentScore < 60
+    lg = 'F';
+elseif percentScore < 70
+    lg = 'D';
+elseif percentScore < 80
+    lg = 'C';
+elseif percentScore < 90
+    lg = 'B';
+else
+    lg = 'A';
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+% ============================================================
+% ============================================================
+% ============================================================
+\subsection{\texttt{for} Loops}
+% ============================================================
+% ============================================================
+% ============================================================
+
+% ============================================================
+% ============================================================
+% ============================================================
+\subsection{\texttt{switch}-\texttt{case} Controls} \label{appendix:switch_case}
+% ============================================================
+% ============================================================
+% ============================================================
+
+A \texttt{switch}-\texttt{case} is useful when a finite, discrete set of cases may occur. The syntax for a \texttt{switch}-\texttt{case} control is as follows:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+switch expr
+	case expr_1
+		statement_group_1
+	case expr_2
+		statement_group_2
+	...
+	otherwise
+		statement_group_otherwise
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Here, the controlling expression evaluates to either a \texttt{char} string or an integer. If \texttt{expr} matches \verb!expr_1!, then only \verb!statement_group_1! executes; if \texttt{expr} matches \verb!expr_2!, then only \verb!statement_group_2! executes. The \texttt{otherwise} key word defines another block of statements that executes if \texttt{expr} does not match any of the expressions following a \texttt{case} key word. \texttt{Asset/calculateValue()} avoids the calculation if the \texttt{Asset} object's \texttt{transactionList} property is empty by using an \verb!if ~isempty(obj.transactionList)! block. Thus, the block executes if \texttt{obj.transactionList} is not empty. Inside this block, a \texttt{for} loop iterates through each transaction and calculates/records the number of units transacted. \texttt{Asset/calculateValue()} uses a the price-per-unit data to determine the transaction cost, the total value, and the cost basis for the asset holdings.
+
+ 
