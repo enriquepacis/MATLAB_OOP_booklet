@@ -1,3 +1,5 @@
+% !TEX root = MATLAB_OOP_Blair.tex
+
 % ============================================================
 % ============================================================
 % ============================================================
@@ -12,7 +14,7 @@
 % ============================================================
 % ============================================================
 
-Object-oriented programming (OOP) is a powerful approach to writing complex software suites that handle non-trivial tasks and calculations. In OOP, the programmer defines \textbf{classes}, which are user-defined, composite data types with associated functions known as \textbf{behaviors}. Behaviors define how an end-user interacts with \textbf{objects}, which are \textbf{instances} of a class.  Thus, programming which involves the use of classes is called object-oriented programming (OOP).
+Object-oriented programming (OOP) is a powerful approach to writing complex software suites that handle non-trivial tasks and calculations. In OOP, the programmer defines \textbf{classes}, which are user-defined, composite data types with associated functions known as \textbf{methods}. methods define how an end-user interacts with \textbf{objects}, which are \textbf{instances} of a class.  Thus, programming which involves the use of classes is called object-oriented programming (OOP).
 
 % ============================================================
 % ============================================================
@@ -25,7 +27,9 @@ In MATLAB, basic or ``elementary'' data types include \texttt{double} (double-pr
 
 Additionally, MATLAB has variables of type \texttt{char}, which store lowercase letters (\texttt{'a'}-\texttt{'z'}), upper-case letters (\texttt{'A'}-\texttt{'Z'}), numerals (\texttt{'0'}-\texttt{'9'}), and myriad other special characters. \textbf{Strings} are arrays (typically, row vectors) of \texttt{char}s, and are themselves considered to be of type \texttt{char}.
 
- In MATLAB, arrays are formed by concatenating elements within brackets (\texttt{[} and \texttt{]}). Horizontal concatenation is achieved by grouping elements within brackets but delimiting (separating) them either by commas (\texttt{,}) or by white space. Vertical concatenation is achieved by delimiting constituents by a semicolon (\texttt{;}). Examples of this are given in the command-line sample below:
+\subsubsection{Arrays}
+
+Arrays store multiple values of the same data type. Each individual value in an array is called an \textbf{element}. In MATLAB, arrays are formed by concatenating elements within brackets (\texttt{[} and \texttt{]}). Horizontal concatenation is achieved by grouping elements within brackets but delimiting (separating) them either by commas (\texttt{,}) or by white space. Vertical concatenation is achieved by delimiting constituents by a semicolon (\texttt{;}). Examples of this are given in the command-line sample below:
 % vvv------------------------------------------------------------vvv
 \begin{lstlisting}[style=Matlab-editor, caption={The Command Window input and output demonstrates horizontal concatenation and vertical concatenation. Concatenation is accomplished using brackets \texttt{[} and \texttt{]}. Elements of a horizontal concatenation are separated by whites space or commas (\texttt{,}); and elements of a vertical concatenation are specified using a semicolon (\texttt{;}).}, label={lst:ConcatenationCommandWindow}]
  >> A = [1 2 3]; B = [4 5 6]; C = [A B]
@@ -46,11 +50,24 @@ In line 1 of Listing \ref{lst:ConcatenationCommandWindow}, we define \texttt{A} 
 
 MATLAB also has another type, known as a \texttt{cell} (short for ``cell array''), in which each element may be of a different type or of different sizes in memory. MATLAB \texttt{double} arrays of different sizes, \texttt{char} arrays different sizes, and even other \texttt{cell}s may be elements of the same \texttt{cell}.
 
+% ============================================================
+% ============================================================
 \subsubsection{Structures}
-MATLAB allows the formation of \textbf{structures} (\texttt{struct}). A structure is a composite variable constituted of \textbf{members} of elementary data types. In OOP, member data are called \textbf{fields} (the term favored in MATLAB documentation and syntax), or \textbf{tags}. For example, the following input (line 1) defines a \texttt{struct} \texttt{S} with two members, \texttt{a} and \texttt{b}.
+% ============================================================
+% ============================================================
+
+MATLAB allows the formation of \textbf{data structures} (or simply ``structures'' for short; and \texttt{struct}s in MATLAB). A structure is a composite variable comprised of multiple pieces of data. MATLAB \texttt{struct}s are very flexible, as a \texttt{struct} may contain data of elementary data types, arrays, cell arrays, other \texttt{structs}, or even more complex and elaborate data types (classes). The constituent data associated with a \texttt{struct} are called \textbf{fields}. We use ``dot syntax'' to define, assign, and reference the fields of a \texttt{struct}. For example, the following input (line 1) defines a new \texttt{struct}, \texttt{S}, with one field, \texttt{a}, and the \texttt{double} 7 is stored in the field \texttt{S.a}. Then, in line 9, a new field, \texttt{b} is added to \texttt{S}, and \texttt{char} array \texttt{'life'} is stored in \texttt{S.b}.
 % vvv------------------------------------------------------------vvv
 \begin{lstlisting}[style=Matlab-editor]
->> S.a = 7; S.b = 'life'
+>> S.a = 7
+
+S = 
+
+  struct with fields:
+
+    a: 7
+
+>> S.b = 'life'
 
 S = 
 
@@ -58,11 +75,36 @@ S =
 
     a: 7
     b: 'life'
+>> y = S.a + 5
+
+y =
+
+    12
+
+>> disp(['The word is: ', S.b])
+The word is: life
 \end{lstlisting}
 % ^^^------------------------------------------------------------^^^
-Here, the field \texttt{a} of \texttt{S}, syntactically referred to as \texttt{S.a}, stores a double value of 7; and the field \texttt{S.b} stores the \texttt{char} array \texttt{`life'}.
+Lines 17 and 23 show how the values stored in \texttt{S.a} and \texttt{S.b} may be referenced and used in further calculations.
 
-\texttt{struct}s are particularly useful for storing various pieces of information associated with one system or even in real life. For example, conditions (location, temperature, pressure, time, etc.) and data measurements for a particular experiment may be stored in the same \texttt{struct}. Or, you might want a \texttt{struct} to store the name, phone number, e-mail address, website and other information for a particular friend, relative, or contact. Then, a collection of such \texttt{struct}s can constitute an address book.
+Additionally, a \texttt{struct} may be formed by specifying field-value pairs in the \texttt{struct()} command:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> R = struct('a', 7, 'b', 'life')
+
+R = 
+
+  struct with fields:
+
+    a: 7
+    b: 'life'
+
+>> 
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+
+\texttt{struct}s are particularly useful for storing various pieces of information associated with one system or event in real life. For example, conditions (location, temperature, pressure, time, etc.) and data measurements for a particular experiment may be stored in the same \texttt{struct}. Or, you might want a \texttt{struct} to store the name, phone number, e-mail address, website and other information for a particular friend, relative, or contact. Then, a collection of such \texttt{struct}s can constitute an address book.
 
 % ============================================================
 % ============================================================
@@ -74,7 +116,208 @@ Functions are an important element of OOP, so we discuss them here only briefly.
 Functions enable code to be modular. A well-written function does a specific task or returns an output based on a set of inputs. The details of the function may be transparent to the user, who can repeatedly call a function without repeatedly copying and pasting the code that underlies the function. This makes the user's code clearer and more understandable. Additionally, if the function requires modification, the implementation of the function may be modified without changing the user's interface of the function.
 
 % ============================================================
-\subsubsection{Writing Functions}
+\subsection{Pre-defined Functions}
+% ============================================================
+MATLAB has numerous pre-defined functions. Here, we discuss a few functions that will be used in following sections of this document.
+
+% ============================================================
+\subsubsection{Mathematical Functions}
+% ============================================================
+MATLAB has numerous mathematical functions for performing calculations, including \texttt{sin()}, \texttt{cos()}, \texttt{real()}, \texttt{imag()}, \texttt{sinc()}, \texttt{exp()}, and so many more.
+
+% ============================================================
+\subsubsection{The \texttt{class()} Function}
+% ============================================================
+This returns the data type of a variable. In the following code, we define a few variables of different types, and then we use the \texttt{class} function to identify their type.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> a = 5;
+>> class(a)
+
+ans =
+
+    'double'
+
+>> class(pi)
+
+ans =
+
+    'double'
+
+>> b = rand(3, 4);
+>> class(b)
+
+ans =
+
+    'double'
+
+>> class('s')
+
+ans =
+
+    'char'
+
+>> class('cat')
+
+ans =
+
+    'char'
+    
+>> friend1.name = 'Alice'; friend1.age = 23; class(friend1)
+
+ans =
+
+    'struct'
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Here, we see that numbers and arrays of numbers are of class (type) \texttt{double}, and characters and arrays of characters are of class \texttt{char}.
+
+% ============================================================
+\subsubsection{The \texttt{length()} Function}
+% ============================================================
+The command \texttt{length(X)} returns the number of elements in the array \texttt{X}. Some examples of this are shown in the following listing:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> A = 1:7
+
+A =
+
+     1     2     3     4     5     6     7
+
+>> length(A)
+
+ans =
+
+     7
+
+>> B = (12:16)'
+
+B =
+
+    12
+    13
+    14
+    15
+    16
+
+>> length(B)
+
+ans =
+
+     5
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+For a matrix \texttt{X}, the command \texttt{length(X)} returns the size of the largest dimension of \texttt{X}:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> C = rand(3,4)
+
+C =
+
+    0.6541    0.4505    0.9133    0.5383
+    0.6892    0.0838    0.1524    0.9961
+    0.7482    0.2290    0.8258    0.0782
+
+>> length(C)
+
+ans =
+
+     4
+
+>> D = rand(4,3)
+
+D =
+
+    0.4427    0.7749    0.3998
+    0.1067    0.8173    0.2599
+    0.9619    0.8687    0.8001
+    0.0046    0.0844    0.4314
+
+>> length(D)
+
+ans =
+
+     4
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+This is equivalent to using the command \texttt{max(size(X))}.
+
+
+% ============================================================
+\subsubsection{The \texttt{disp()} Function}
+% ============================================================
+The \texttt{disp()} function writes a string to the MATLAB Command Window output, as shown in the following listing:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> some_str = 'hello';
+>> disp(some_str)
+hello
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+% ============================================================
+\subsubsection{The \texttt{num2str()} Function}
+% ============================================================
+The \texttt{num2str(x, formatStr)} converts a number (\texttt{double}) to a \texttt{char} string, with options specified using the string \texttt{formatStr}.
+
+If we wish to display  the value of a number using \texttt{disp()}, we must convert it to a string first. This may be done using \texttt{(num2str()}, for example:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> x = 9;
+>> disp(['x = ', num2str(x)])
+x = 9
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Since \texttt{disp()} receives only one string input argument, we horizontally concatenate the two strings \texttt{'x = '} and \texttt{num2str(x)} into one using horizontal concatenation.
+
+% ============================================================
+\subsubsection{Obtaining Time Intervals using \texttt{tic} and \texttt{toc}}
+% ============================================================
+
+Have you ever wished that you can use a stopwatch in MATLAB? This can allow you to determine how long some code will take, like starting a stopwatch when a runner leaves the starting line and stopping it when she crosses the 400-m mark. This could also allow you to execute a \texttt{while} loop as long as elapsed time is within some limit.
+
+Time intervals may be measured using the \texttt{tic} and \texttt{toc} commands. When you wish to start the time, use \texttt{tic}. A subsequent \texttt{toc} stops the timer and returns the time interval measurement; or you can measure a time interval and make a count-down timer. For example:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+>> tic; % like starting a stopwatch
+pause(0.25); % insert a pause to simulate some commands run
+time_elapsed = toc % ends the timer and reports the time elapsed
+
+time_elapsed =
+
+    0.2555
+
+>> 
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Using a variable, such as \texttt{x = tic}, establishes \texttt{x} as a time marker. When supplied as an input to the \texttt{toc} command, \texttt{toc} returns time elapsed since \texttt{x} was defined. Thus, multiple reference points may be used in a calculation. For example, code like this may be used:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+start_time = tic; % interval start time reference
+pause(0.25); % insert a pause to simulate some commands run
+first_interval = toc(start_time); % measure first time interval
+mid_time = tic; % adds a second reference, mid_time
+pause(0.75);  % insert a pause to simulate some commands run
+end_interval = toc(mid_time); % measure time since mid_time
+total_time = toc(start_time); % measure time since first_time
+disp(sprintf('First interval: %5.3f s', first_interval) )
+disp(sprintf('Second interval: %5.3f s', end_interval))
+disp(sprintf('Total duration: %5.3f s', total_time))
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+The output would be something like this:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+First interval: 0.257 s
+Second interval: 0.755 s
+Total duration: 1.016 s
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+To see more demonstrations of \texttt{tic} and \texttt{toc}, see \myhref{https://youtu.be/Bpsuf-wE6eY}{this video}.
+
+% ============================================================
+\subsection{User-defined Functions}
 % ============================================================
 A MATLAB function is typically defined in a text file with the extension \texttt{*.m}. Here are some salient features of a function definition file.
 
@@ -98,49 +341,6 @@ Here, the function \texttt{functionName} is a three-input, two-output function.
 \end{enumerate}
 \item Commented lines of code immediately following the header provide function help documentation. When you type \texttt{help functionName} in the command line, the function help you defined appears in the command line.
 \end{enumerate}
-
-% ============================================================
-\subsubsection{The \texttt{varargin} Key Word}
-% ============================================================
-The key word \texttt{varargin} may be used in a function header to allow a variable number of input arguments. For example, in the function definition below, inputs \texttt{in1}, \texttt{in2}, and \texttt{in3} are mandatory, but \texttt{varargin} allows for zero or more additional input arguments.
-% vvv------------------------------------------------------------vvv
-\begin{lstlisting}[style=Matlab-editor]
-function [out1, out2] = functionName( in1, in2, in3, varargin)
-	statements
-end
-\end{lstlisting}
-% ^^^------------------------------------------------------------^^^
-Thus, through the flexibility afforded by \texttt{varargin}, the following invocations of \texttt{functionName} all are valid:
-% vvv------------------------------------------------------------vvv
-\begin{lstlisting}[style=Matlab-editor]
-[a, b] = functionName( x, y, z );
-
-[c, d] = functionName( x, y, z, e );
-
-[g, h] = functionName( x, y, z, e, j, k );
-\end{lstlisting}
-% ^^^------------------------------------------------------------^^^
-Of course, we must design the body of \texttt{functionName()} to correctly support the various invocations.
-
-% ============================================================
-\subsubsection{The \texttt{nargin} Function}
-% ============================================================
-MATLAB has a special function named \texttt{nargin}. When invoked inside another function, \texttt{nargin} returns the number of input arguments specified in an invocation of the function of interest. This is particularly useful when that function is designed to support variable input arguments.
-
-% ============================================================
-\subsubsection{The \texttt{length()} Function}
-% ============================================================
-The \texttt{length()} function returns the number of elements in an array.
-
-% ============================================================
-\subsubsection{The \texttt{disp()} Function}
-% ============================================================
-The \texttt{disp()} function writes a string to the MATLAB Command Window output.
-
-% ============================================================
-\subsubsection{The \texttt{num2str()} Function}
-% ============================================================
-The \texttt{num2str(x, formatStr)} converts a number (\texttt{double}) to a \texttt{char} string, with options specified using the string \texttt{formatStr}.
 
 % ============================================================
 % ============================================================
@@ -183,6 +383,95 @@ Line 1 of Listing \ref{lst:CmdWinTest_f_function} invokes \texttt{f\_function()}
 
 Functions may also take data of type \texttt{char}, \texttt{cell}, \texttt{struct}, or even objects of classes as input. Outputs may be of the same types.
 
+
+
+% ============================================================
+\subsubsection{The \texttt{varargin} Keyword}
+% ============================================================
+The key word \texttt{varargin} may be used in a function header to allow a variable number of input arguments. For example, in the function definition below, inputs \texttt{in1}, \texttt{in2}, and \texttt{in3} are mandatory, but \texttt{varargin} allows for zero or more additional input arguments.
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+function [out1, out2] = functionName( in1, in2, in3, varargin)
+	statements
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Thus, through the flexibility afforded by \texttt{varargin}, the following invocations of \texttt{functionName} all are valid:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+[a, b] = functionName( x, y, z );
+
+[c, d] = functionName( x, y, z, e );
+
+[g, h] = functionName( x, y, z, e, j, k );
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Of course, we must design the body of \texttt{functionName()} to correctly support the various invocations.
+
+% ============================================================
+\subsubsection{The \texttt{nargin} Function}
+% ============================================================
+MATLAB has a special function named \texttt{nargin}. When invoked inside another function, \texttt{nargin} returns the number of input arguments specified in an invocation of the function of interest. This is particularly useful when that function is designed to support variable input arguments using \texttt{varargin}. Here, we may use \texttt{nargin} with some logical control structure, such as \texttt{if}-\texttt{else} or \texttt{switch}-\texttt{case}.
+
+You may already have used \texttt{varargin} this without knowing it if you have used the \texttt{plot()} command:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+x = linspace(0, 1, 101);
+y = sin(2*pi*x);
+figure;
+plot(x, y); % generates a default plot
+figure % new figure
+plot(x, abs(y), 'LineWidth', 2', 'LineStyle', '--'); % new plot, this time with options
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+Notice that we use the same \texttt{plot()} function, but with a different number of arguments. The key to doing this is \texttt{varargin}, and now that key is in your hand!
+
+For example, here is a function that allows a user to calculate values of a quadratic or a cubic expression:
+% vvv------------------------------------------------------------vvv
+\begin{lstlisting}[style=Matlab-editor]
+function y = calc_poly(x, a, b, c, varargin)
+%CALC_POLY calculates the value of a quadratic, cubic or quartic
+%        expressions.
+%
+% SYNTAX
+% ======
+%   y = calc_poly(x, a, b, c ) evaluates the value of the quadratic
+%       expression a*x^2 + b*x + c
+%
+%   y = calc_poly(x, a, b, c, d ) evaluates the value of the cubic
+%       expression a*x^3 + b*x^2 + c*x + d
+%
+%   y = calc_poly(x, a, b, c, d, f ) evaluates the value of the
+%        quartic expression a*x^4 + b*x^3 + c*x^2 + d*x + f
+%
+% By. E.P. Blair
+% Baylor University
+% 2021.04.17
+
+switch nargin % number of input arguments
+    case 4 % quadratic
+        y = a*x.^2 + b*x + c;
+        
+    case 5  % cubic
+        d = varargin{1};
+        y = a*x.^3 + b*x.^2 + c*x + d;
+        
+    case 6  % quartic
+        d = varargin{1};
+        f = varargin{2};
+        y = a*x.^4 + b*x.^3 + c*x.^2 + d*x + f;
+
+    otherwise
+        error(['calc_poly: invalid number (', num2str(nargin), ...
+            ') of input arguments.'])
+
+end
+\end{lstlisting}
+% ^^^------------------------------------------------------------^^^
+
+
+
+
 % ============================================================
 % ============================================================
 \subsection{Classes}
@@ -190,21 +479,21 @@ Functions may also take data of type \texttt{char}, \texttt{cell}, \texttt{struc
 % ============================================================
 
 \subsubsection{Beyond Structures}
-Sometimes, simply storing information in structures is not enough. In these cases, it is desirable to perform manipulations on the various groups of information, or model the effects of particular events on the items represented by structures. In these cases, it is powerfully helpful to define \textbf{classes}. Classes extend the capability of \texttt{struct}s by defining a standard set of fields, called \textbf{properties}, and by defining an associated set of class \texttt{methods}. A particular instance or extended \texttt{struct} of a class is called an \textbf{object}. We can think of an object as a variable of a custom-data type (the class). Methods\textemdash sometimes called \textit{behaviors} in other programming languages \textemdash are a set of functions that define operations on objects.
+Sometimes, simply storing information in structures is not enough. In these cases, it is desirable to perform manipulations on the various groups of information, or model the effects of particular events on the items represented by structures. In these cases, it is powerfully helpful to define \textbf{classes}. Classes extend the capability of \texttt{struct}s by defining a standard set of fields, called \textbf{properties}, and by defining an associated set of class \textbf{methods}. A particular instance or extended \texttt{struct} of a class is called an \textbf{object}. We can think of an object as a variable of a custom-data type (the class). Methods\textemdash sometimes called \textit{behaviors} in other programming languages \textemdash are a set of functions that are used to extract information from or manipulate objects.
 
 \subsubsection{Motivation for Classes}
 One example where classes might be useful is in an online gaming system. Here, we might want a class called \texttt{Avatar} (we will use the convention in which we capitalize the name of a user-defined class to distinguish it from MATLAB's own pre-defined classes). For each individual player, an object of class \texttt{Avatar} may store the user's real name, handle, level, experience points, maximum vitality, and health. Then, \texttt{Avatar} class methods can define operations on objects such as \texttt{gainXP()} to add to a player's experience points, \texttt{levelUp()} to implement an irreversible milestone in the development of the player's avatar, and \texttt{attack()} to model one player's attack on another player, which may detract from the health of the target of the attack. One can imagine myriad other methods that might be desirable in a complex gaming system.
 
-Another example in which classes may be useful is in the design of a software system that tracks an individual's investments. Investments may be in stocks and mutual funds. We might wish to make an \texttt{Asset} class that stores in its member data an asset name, a symbol, and based on a list of transactions, can calculate the worth of that particular holding. A transaction can be represented by objects of a \texttt{Transaction} class, which stores information about the transaction date, the type of transaction(open, buy, sell, split, dividend, short, close out, etc.), the number of shares transacted, the price per share, and any transaction fees. A particular \texttt{Asset} object may include a list of transactions. With the list of transactions and up-to-date information about share price, an \texttt{Asset} class behavior, say, \texttt{calculateValue()}, may be used to calculate the worth of the holding. Then, a \texttt{Portfolio} class may be designed to contain multiple \texttt{Asset} objects. The \texttt{Portfolio} class, then, is called a \textbf{container} class for objects of \texttt{Asset}.
+Another example in which classes may be useful is in the design of a software system that tracks an individual's investments. Investments may be in stocks and mutual funds. We might wish to make an \texttt{Asset} class that stores in its member data an asset name, a symbol, and based on a list of transactions, can calculate the worth of that particular holding. A transaction can be represented by objects of a \texttt{Transaction} class, which stores information about the transaction date, the type of transaction(open, buy, sell, split, dividend, short, close out, etc.), the number of shares transacted, the price per share, and any transaction fees. A particular \texttt{Asset} object may include a list of transactions. With the list of transactions and up-to-date information about share price, an \texttt{Asset} class method, say, \texttt{calculateValue()}, may be used to calculate the worth of the holding. Then, a \texttt{Portfolio} class may be designed to contain multiple \texttt{Asset} objects. The \texttt{Portfolio} class, then, is called a \textbf{container} class for \texttt{Asset} objects.
 
 \subsubsection{The Advantages of Classes}
 
 One might think that classes add complexity to computer programs. Indeed, classes and OOP allow vast complexity to be handled in a clean and logical manner. Some of the benefits of using classes:
 
 \begin{enumerate}
-\item Encapsulation. Many lines of code\textemdash think hundreds or thousands\textemdash required to implement an operation on an object may be cleanly invoked with a simple call to a behavior function. Also, if we must modify the behavior, it can be done once in the class definition. This ``under-the-hood'' modification may be transparent to a user, who can invoke the modified function using the same syntax as before, but with the benefits of an improved behavior.
+\item Encapsulation. Many lines of code\textemdash think hundreds or thousands\textemdash required to implement an operation on an object may be cleanly invoked with a simple call to a method function. Also, if we must modify the method, it can be done once in the class definition. This ``under-the-hood'' modification may be transparent to a user, who can invoke the modified function using the same syntax as before, but with the benefits of an improved method.
 
-\item Understandability. With well-chosen, smartly-defined behaviors, OOP adds great understandability. Complex tasks can be executed by invoking aptly-named behaviors.
+\item Understandability. With well-chosen, smartly-defined methods, OOP adds great understandability. Complex tasks can be executed by invoking aptly-named methods.
 
-\item Hierarchical behavior. The user can invoke a behavior a container-class object, and the container-class behavior can automatically invoke a behavior of the objects contained therein. For example, a \texttt{Portfolio}-class behavior \texttt{calculateValue()} can invoke the \texttt{calculateValue()} for each holding therein. It can gather the returned values and sum them, to report the value of the investment portfolio it represents. This complex behavior is transparent to the user, who simply queries the \texttt{Portfolio}-class object for its value.
+\item Hierarchical methods. The user can invoke a method a container-class object, and the container-class method can automatically invoke a method of the objects contained therein. For example, a \texttt{Portfolio}-class method \texttt{calculateValue()} can invoke the \texttt{calculateValue()} for each asset therein. It can gather the returned values and sum them, to report the value of the investment portfolio it represents. This complex method is transparent to the user, who simply queries the \texttt{Portfolio}-class object for its value.
 \end{enumerate}

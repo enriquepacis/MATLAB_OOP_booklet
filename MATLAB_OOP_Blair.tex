@@ -31,6 +31,10 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \theoremstyle{definition}
 \newtheorem{exmp}{Example}[section]
 
+\usepackage{hyperref}		% Enables hyperlinks via "\hyperref{}" and "\href{}{}" and "\url{}"
+\usepackage{soul} 
+\newcommand{\myhref}[2]{\textcolor{blue}{\href{#1}{\ul{#2}}}}
+
 % Title information
 \author{Enrique P. Blair, Ph.D.}
 \title{An Introduction to Object-oriented Programming in MATLAB}
@@ -56,9 +60,10 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \clearpage
 
 \include{01_IntroductionSection}
-\include{02_DefiningClasses}
+\include{BuiltInClasses}
+\include{DefiningClasses}
 \include{03_InvestmentTracking}
-\include{04_Graphics}
+% \include{04_Graphics}
 \include{05_Example_GameInfrastructure}
 \include{Appendix}
 
