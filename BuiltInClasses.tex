@@ -394,7 +394,7 @@ ans =
 % ^^^------------------------------------------------------------^^^
 Line 19 shows how we can use the dot syntax to change the \texttt{LineStyle} property for \texttt{data\_plot(1)}, resulting in Figure \ref{fig:TwoLines_dashed}.
 
-The \texttt{Line} object has special properties, \texttt{XData}, \texttt{YData}, and \texttt{ZData}. These contain the actual \(x\), \(y\), and \(z\) coordinates of data points plotted. Since there is no \texttt{ZData}, the plot is a 2D plot. If you wisxhed to change or animate your plot, it could be faster and visually smoother to simply update these properties, rather than replot the data with a new call to the \texttt{plot()} command. This will save time, since you do not have to clear the axes nor reformat it if you only adjust these special properties of the \texttt{Line} object.
+The \texttt{Line} object has special properties, \texttt{XData}, \texttt{YData}, and \texttt{ZData}. These contain the actual \(x\), \(y\), and \(z\) coordinates of data points plotted. Since there is no \texttt{ZData}, the plot is a 2D plot. If you wish to change or animate your plot, it could be faster and visually smoother to simply update these properties, rather than replot the data with a new call to the \texttt{plot()} command. This will save time, since you do not have to clear the axes nor reformat it if you only adjust these special properties of the \texttt{Line} object.
 
 An alternate and older way to get MATLAB graphics properties is to use the \texttt{get()} function. For example, \texttt{line\_col = get(data\_plot(1))} stores the red-green-blue (RBG) triple for \texttt{data\_plot(1)} in \texttt{line\_col}. This may also be done for any object of a MATLAB graphics class (\texttt{Figure}, \texttt{Axes}, \texttt{Line}, \texttt{Patch}, etc.).
 
@@ -468,7 +468,7 @@ The syntax here is \verb!set(obj, Prop1, Val1, Prop2, Val2, ...)!, where \texttt
    \centering
    \subfigure[ \label{fig:basicPatchDisplaced}]{\includegraphics[width=0.475\textwidth]{graphics/basicPatchDisplaced.png}}
    \subfigure[ \label{fig:AxisEq}]{\includegraphics[width=0.475\textwidth]{graphics/FigPatchAxisEqual.png} \label{subfig:basicPatchOutputGraph}}
-      \caption{The \texttt{patch} object created using \texttt{basicPatch.m} is modified by using the \texttt{set()} function using the code of Listing \ref{basicPatchDisplace}. The resulting \texttt{patch} no longer sits at the origin.}
+      \caption{(a) The \texttt{patch} object created using \texttt{basicPatch.m} is modified by using the \texttt{set()} function using the code of Listing \ref{basicPatchDisplace}. The resulting \texttt{patch} no longer sits at the origin. (b) The axes aspect ratio is made to be equal.}
 
 \end{figure}
 % ^^^------------------------------------------------------------^^^
